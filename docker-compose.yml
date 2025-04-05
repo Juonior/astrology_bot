@@ -8,7 +8,7 @@ services:
       container_name: astrology_bot
       restart: unless-stopped
       environment:
-        - BOT_TOKEN=7598996397:AAH0PhACjMkcoz8BkGYLRuUtomAsXJKtI6g
+        - BOT_TOKEN=
         - POSTGRES_DB=telegram_bot_db
         - POSTGRES_USER=bot_user
         - POSTGRES_PASSWORD=secure_password
