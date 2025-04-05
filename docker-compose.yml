@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  bot:
+      build:
+        context: ./telegram-bot 
+        dockerfile: Dockerfile
+      container_name: astrology_bot
+      restart: unless-stopped
+      environment:
+        - BOT_TOKEN=7598996397:AAH0PhACjMkcoz8BkGYLRuUtomAsXJKtI6g
+        - POSTGRES_DB=telegram_bot_db
+        - POSTGRES_USER=bot_user
+        - POSTGRES_PASSWORD=secure_password
+        - POSTGRES_HOST=postgres
+        - POSTGRES_PORT=5432
+        - HOROSCOPE_API_BASE_URL=http://horoscope-api:8000
+      depends_on:
+        - postgres
+      volumes:
+        - ./telegram-bot/logs:/app/logs
+        - ./telegram-bot:/app
+      networks:
+      - horoscope
+  horoscope-api:
+      container_name: horoscope-api
+      build: 
+       context: ./restapi 
+       dockerfile: Dockerfile 
+      ports:
+        - "8000:8000"
+      environment:
+        - APP_HOST=0.0.0.0
+        - APP_PORT=8000
+        - DEBUG=True
+        - APP_NAME=Horoscope API
+      volumes:
+        - ./restapi:/app 
+      restart: unless-stopped
+      networks:
+      - horoscope
+  postgres:
+    image: postgres:15-alpine
+    container_name: telegram_bot_postgres
+    environment:
+      POSTGRES_DB: telegram_bot_db
+      POSTGRES_USER: bot_user
+      POSTGRES_PASSWORD: secure_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5436:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bot_user -d telegram_bot_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - horoscope
+
+volumes:
+  postgres_data:
+
+networks:
+  horoscope:
+    external: true

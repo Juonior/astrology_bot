@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  horoscope-api:
+    build: .
+    ports:
+      - "${APP_PORT}:${APP_PORT}"
+    env_file:
+      - .env
+    volumes:
+      - ./app:/app/app  # Для hot-reload при разработке
+      - ./.env:/app/.env
+    restart: unless-stopped
